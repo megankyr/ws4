@@ -32,8 +32,10 @@ public class CookieClientHandler implements Runnable {
     private void handleClient(Socket clientSocket) throws IOException {
         try (BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()))) {
             String request = in.readLine();
-            if (request.equals("get-cookie")) {
-                sendCookies(clientSocket);
+            String[] requests = request.split("\\[|\\]");
+            if (requests.length == 2 && requests[0].equals("get-cookie")) {
+                int count = Integer.parseInt(requests[1]);
+                sendCookies(clientSocket, count);
             } else if (request.equals("stop")) {
                 System.out.println("Client has requested to close the connection");
                 clientSocket.close();
@@ -45,10 +47,12 @@ public class CookieClientHandler implements Runnable {
         }
     }
 
-    private void sendCookies(Socket clientSocket) throws IOException {
+    private void sendCookies(Socket clientSocket, int count) throws IOException {
         try (PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true)) {
-            String fortune = cookieInstance.getRandomCookie();
-            out.println("cookie-text " + fortune);
+            for (int i = 0; i < count; i++){
+                String fortune = cookieInstance.getRandomCookie();
+                out.println("cookie-text " + fortune);
+            }
         }
     }
 }
